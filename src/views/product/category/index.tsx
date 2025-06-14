@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { categoryAllList, categoryDeleteApi, categoryDetail, categoryListApi, switchStatusApi } from "@/api/modules/category";
 import { Table, Popconfirm, Button, Row, Col, Switch, message, Form, Input, FormProps, Select } from "antd";
-import { AddDrawer } from "@/views/product/category/componets/add-drawer";
 import { Category as CategoryProp } from "@/api/interface/category";
 import { OnlineStatus } from "@/views/product/category/enums";
 import { PageMetaData, ReqPage } from "@/api/interface";
 import Page from "@/components/page";
+import { AddEdit } from "@/views/product/category/componets/add-edit";
 
 type FieldType = {
 	name?: string;
@@ -48,7 +48,9 @@ const Category = () => {
 	const onDelete = (id: string) => {
 		categoryDeleteApi(id).then(res => {
 			if (res.code === 200) {
-				fetchList(pageParam);
+				message.success("删除分类成功", 0.5).then(() => {
+					fetchList(pageParam);
+				});
 			}
 		});
 	};
@@ -83,7 +85,17 @@ const Category = () => {
 		fetchList(pageParam);
 	};
 
+	const onSuccess = () => {
+		fetchList(pageParam);
+	};
+
 	const columns = [
+		{
+			title: "序号",
+			key: "index",
+			align: "center" as const,
+			render: (text: string, record: CategoryProp.CategoryRes, index: number) => index
+		},
 		{ title: "分类名称", dataIndex: "name", key: "name", align: "center" as const },
 		{ title: "分类描述", dataIndex: "description", key: "description", align: "center" as const },
 		{ title: "排序", dataIndex: "index", key: "index", align: "center" as const },
@@ -161,13 +173,16 @@ const Category = () => {
 					</Col>
 					<Col span={6}>
 						<Form.Item label={"父分类"} name={"parent"}>
-							<Select allowClear placeholder={"请选择父分类"}>
-								{data.map(i => (
-									<Option value={i.id} key={i.id}>
-										{i.name}
-									</Option>
-								))}
-							</Select>
+							<Select
+								allowClear
+								placeholder={"请选择父分类"}
+								showSearch
+								optionFilterProp="label"
+								filterSort={(optionA, optionB) =>
+									(optionA?.label ?? "").toLowerCase().localeCompare((optionB?.label ?? "").toLowerCase())
+								}
+								options={data.map(i => ({ label: i.name, value: i.id }))}
+							></Select>
 						</Form.Item>
 					</Col>
 					<Col span={6}>
@@ -201,7 +216,7 @@ const Category = () => {
 			</Form>
 			<Table bordered dataSource={list} columns={columns} pagination={false} />
 			<Page pageMeta={pageMeta} onChange={onChange} />
-			<AddDrawer open={open} onClose={() => setOpen(false)} onSuccess={fetchList} data={data} cate={cate} />
+			<AddEdit open={open} data={data} cate={cate} onCancel={() => setOpen(false)} onSuccess={onSuccess} />
 		</div>
 	);
 };

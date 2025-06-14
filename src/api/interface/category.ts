@@ -10,7 +10,6 @@ export namespace Category {
 		img: string;
 		name: string;
 		description: string;
-		parent_id: string;
 		parent: CategoryRes;
 	}
 }
