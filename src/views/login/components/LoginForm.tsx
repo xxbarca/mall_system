@@ -1,5 +1,5 @@
 // import md5 from "js-md5";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Form, Input, message } from "antd";
 import { useNavigate } from "react-router-dom";
 import { Login } from "@/api/interface";
@@ -17,6 +17,12 @@ const LoginForm = (props: any) => {
 	const navigate = useNavigate();
 	const [form] = Form.useForm();
 	const [loading, setLoading] = useState<boolean>(false);
+	useEffect(() => {
+		form.setFieldsValue({
+			username: "admin",
+			password: "admin123"
+		});
+	}, []);
 
 	// 登录
 	const onFinish = async (loginForm: Login.ReqLoginForm) => {
@@ -24,7 +30,6 @@ const LoginForm = (props: any) => {
 			setLoading(true);
 			// loginForm.password = md5(loginForm.password);
 			const { data } = await loginApi(loginForm);
-			console.log(data);
 			setToken(data?.accessToken);
 			setTabsList([]);
 			message.success("登录成功！");
