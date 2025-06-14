@@ -1,22 +1,31 @@
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { categoryAllList, categoryDeleteApi, categoryDetail, categoryListApi, switchStatusApi } from "@/api/modules/category";
-import { Table, Popconfirm, Button, Row, Col, Switch, message } from "antd";
+import { Table, Popconfirm, Button, Row, Col, Switch, message, Form, Input, FormProps, Select } from "antd";
 import { AddDrawer } from "@/views/product/category/componets/add-drawer";
 import { Category as CategoryProp } from "@/api/interface/category";
 import { OnlineStatus } from "@/views/product/category/enums";
-import { PageMetaData } from "@/api/interface";
+import { PageMetaData, ReqPage } from "@/api/interface";
 import Page from "@/components/page";
-import TableHeader from "@/components/TableHeader";
 
+type FieldType = {
+	name?: string;
+	parent?: string;
+};
 const Category = () => {
 	const [open, setOpen] = useState<boolean>(false);
 	const [list, setList] = useState<Array<CategoryProp.CategoryRes>>([]);
 	const [data, setData] = useState<Array<CategoryProp.CategoryRes>>([]);
 	const [pageMeta, setPageMeta] = useState<PageMetaData>({} as PageMetaData);
 	const [cate, setCate] = useState<CategoryProp.CategoryRes>();
-	const fetchList = (page: number = 1, limit: number = 10) => {
-		categoryListApi({ page, limit }).then(res => {
+	const [pageParam, setPageParam] = useState<ReqPage>({
+		page: 1,
+		limit: 10
+	});
+	const [form] = Form.useForm();
+	const { Option } = Select;
+	const fetchList = (param: ReqPage & FieldType) => {
+		categoryListApi(param).then(res => {
 			const items = res.data.items.map((item: CategoryProp.CategoryRes) => {
 				return {
 					...item,
@@ -33,13 +42,13 @@ const Category = () => {
 		});
 	};
 	useEffect(() => {
-		fetchList();
+		fetchList(pageParam);
 		fetchAll();
 	}, []);
 	const onDelete = (id: string) => {
 		categoryDeleteApi(id).then(res => {
 			if (res.code === 200) {
-				fetchList();
+				fetchList(pageParam);
 			}
 		});
 	};
@@ -50,7 +59,11 @@ const Category = () => {
 		});
 	};
 	const onChange = (page: number, limit: number) => {
-		fetchList(page, limit);
+		setPageParam({
+			page,
+			limit
+		});
+		fetchList({ page, limit });
 	};
 
 	const switchStatus = (id: string) => {
@@ -61,17 +74,26 @@ const Category = () => {
 		});
 	};
 
+	const onFinish: FormProps<FieldType>["onFinish"] = values => {
+		fetchList({ ...pageParam, ...values });
+	};
+
+	const onReset = () => {
+		form.resetFields();
+		fetchList(pageParam);
+	};
+
 	const columns = [
-		{ title: "分类名称", dataIndex: "name", key: "name", align: "center" },
-		{ title: "分类描述", dataIndex: "description", key: "description", align: "center" },
-		{ title: "排序", dataIndex: "index", key: "index", align: "center" },
-		{ title: "图片", dataIndex: "img", key: "img", align: "center" },
+		{ title: "分类名称", dataIndex: "name", key: "name", align: "center" as const },
+		{ title: "分类描述", dataIndex: "description", key: "description", align: "center" as const },
+		{ title: "排序", dataIndex: "index", key: "index", align: "center" as const },
+		{ title: "图片", dataIndex: "img", key: "img", align: "center" as const },
 		{
 			title: "是否上线",
 			dataIndex: "online",
 			key: "online",
-			align: "center",
-			render: (text: number, record: CategoryProp.CategoryRes) => (
+			align: "center" as const,
+			render: (text: string, record: CategoryProp.CategoryRes) => (
 				<Switch defaultChecked={text === OnlineStatus.ONLINE} onChange={() => switchStatus(record.id)} />
 			)
 		},
@@ -79,34 +101,34 @@ const Category = () => {
 			title: "父分类",
 			dataIndex: "parent",
 			key: "parent",
-			align: "center",
+			align: "center" as const,
 			render: (_: any, record: CategoryProp.CategoryRes) => <div>{record.parent ? record.parent.name : ""}</div>
 		},
 		{
 			title: "创建时间",
 			dataIndex: "create_time",
 			key: "create_time",
-			align: "center",
+			align: "center" as const,
 			render: (t: string) => <div>{dayjs(t).format("YYYY-MM-DD hh:mm:ss")}</div>
 		},
 		{
 			title: "更新时间",
 			dataIndex: "update_time",
 			key: "update_time",
-			align: "center",
+			align: "center" as const,
 			render: (t: string) => <div>{dayjs(t).format("YYYY-MM-DD hh:mm:ss")}</div>
 		},
 		{
 			title: "删除时间",
 			dataIndex: "delete_time",
 			key: "delete_time",
-			align: "center",
+			align: "center" as const,
 			render: (t: string) => <div>{t ? dayjs(t).format("YYYY-MM-DD hh:mm:ss") : ""}</div>
 		},
 		{
 			title: "操作",
 			dataIndex: "",
-			align: "center",
+			align: "center" as const,
 			key: "x",
 			render: (_: any, record: CategoryProp.CategoryRes) => (
 				<div>
@@ -130,7 +152,53 @@ const Category = () => {
 	];
 	return (
 		<div className="card content-box">
-			<TableHeader onClick={() => setOpen(true)} />
+			<Form onFinish={onFinish} form={form}>
+				<Row gutter={10}>
+					<Col span={6}>
+						<Form.Item label={"分类名称"} name={"name"}>
+							<Input placeholder={"请输入分类名称"} />
+						</Form.Item>
+					</Col>
+					<Col span={6}>
+						<Form.Item label={"父分类"} name={"parent"}>
+							<Select allowClear placeholder={"请选择父分类"}>
+								{data.map(i => (
+									<Option value={i.id} key={i.id}>
+										{i.name}
+									</Option>
+								))}
+							</Select>
+						</Form.Item>
+					</Col>
+					<Col span={6}>
+						<Form.Item label={"是否上线"} name={"online"}>
+							<Select placeholder={"请选择是否在线"}>
+								<Option value={OnlineStatus.ONLINE}>在线</Option>
+								<Option value={OnlineStatus.OFFLINE}>下线</Option>
+							</Select>
+						</Form.Item>
+					</Col>
+					<Col span={6}>
+						<Form.Item label={null}>
+							<Row gutter={10}>
+								<Col>
+									<Button type={"primary"} htmlType={"submit"}>
+										搜索
+									</Button>
+								</Col>
+								<Col>
+									<Button onClick={onReset}>重置</Button>
+								</Col>
+								<Col>
+									<Button type={"primary"} onClick={() => setOpen(true)}>
+										添加
+									</Button>
+								</Col>
+							</Row>
+						</Form.Item>
+					</Col>
+				</Row>
+			</Form>
 			<Table bordered dataSource={list} columns={columns} pagination={false} />
 			<Page pageMeta={pageMeta} onChange={onChange} />
 			<AddDrawer open={open} onClose={() => setOpen(false)} onSuccess={fetchList} data={data} cate={cate} />
