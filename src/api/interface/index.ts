@@ -17,7 +17,7 @@ export interface PageMetaData {
 	totalPages: number;
 }
 
-export interface PageData<T = any> extends Result {
+export interface PageResult<T = any> extends Result {
 	data: {
 		items: Array<T>;
 		meta: PageMetaData;

@@ -1,9 +1,9 @@
 import http from "@/api";
-import { PageData, Result, ResultData } from "@/api/interface";
+import { PageResult, Result, ResultData } from "@/api/interface";
 import { Category } from "@/api/interface/category";
 
 export const categoryListApi = (params: Object) => {
-	return http.post<PageData<Category.CategoryRes>>("/category/paginate", params);
+	return http.post<PageResult<Category.CategoryRes>>("/category/paginate", params);
 };
 
 export const categoryCreateApi = (params: Object) => {

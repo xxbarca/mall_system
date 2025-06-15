@@ -41,7 +41,7 @@ export const AddEdit = ({ open, data, cate, onCancel, onSuccess }: Props) => {
 		});
 	};
 	return (
-		<Modal open={open} title={"添加分类"} onCancel={onCancel} onOk={onOk} width={"60%"}>
+		<Modal open={open} title={cate ? "修改分类" : "添加分类"} onCancel={onCancel} onOk={onOk} width={"60%"}>
 			<Form {...layout} form={form}>
 				<Form.Item label={"分类名称"} name={"name"} rules={[{ required: true, message: "请输入分类名称" }]}>
 					<Input />
