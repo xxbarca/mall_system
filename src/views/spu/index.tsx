@@ -59,13 +59,23 @@ const Sku = () => {
 			title: "价格(元)",
 			key: "price",
 			dataIndex: "price",
-			align: "center" as const
+			align: "center" as const,
+			width: 100
 		},
 		{
 			title: "折扣价(元)",
 			key: "discount_price",
 			dataIndex: "discount_price",
-			align: "center" as const
+			align: "center" as const,
+			width: 100
+		},
+		{
+			title: "分类",
+			key: "category",
+			dataIndex: "category",
+			align: "center" as const,
+			width: 100,
+			render: (t: string, record: SpuProp.SpuRes) => <span>{record.category.name}</span>
 		},
 		{
 			title: "标签",
@@ -146,7 +156,7 @@ const Sku = () => {
 	const onDelete = (id: string) => {
 		console.log(id);
 	};
-	const fetchList = (param: ReqPage) => {
+	const fetchList = (param: ReqPage & FieldType) => {
 		spuListApi(param).then(res => {
 			const items = res.data.items.map((item: SpuProp.SpuRes) => {
 				return {
@@ -164,7 +174,7 @@ const Sku = () => {
 		});
 	};
 	const onFinish: FormProps<FieldType>["onFinish"] = values => {
-		console.log(values);
+		fetchList({ ...pageParam, ...values });
 	};
 	const onChange = (page: number, limit: number) => {
 		console.log(page, limit);
@@ -174,6 +184,7 @@ const Sku = () => {
 
 	const onReset = () => {
 		form.resetFields();
+		fetchList(pageParam);
 	};
 
 	useEffect(() => {
@@ -232,7 +243,7 @@ const Sku = () => {
 					</Col>
 				</Row>
 			</Form>
-			<Table columns={columns} dataSource={list} bordered scroll={{ x: "max-content" }} />
+			<Table columns={columns} dataSource={list} bordered scroll={{ x: "max-content" }} pagination={false} />
 			<Page pageMeta={pageMeta} onChange={onChange} />
 			<AddEdit open={open} data={data} onCancel={() => setOpen(false)} onSuccess={onSuccess} />
 		</div>

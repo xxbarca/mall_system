@@ -18,7 +18,6 @@ const AddEdit = ({ open, onCancel, onSuccess, data }: Props) => {
 	};
 	const fetchKeyList = () => {
 		specKeyListApi().then(res => {
-			console.log(res.data);
 			setKeyList(res.data);
 		});
 	};
@@ -60,6 +59,7 @@ const AddEdit = ({ open, onCancel, onSuccess, data }: Props) => {
 				</Form.Item>
 				<Form.Item label={"选择规格"}>
 					<Select
+						placeholder={"请选择规格"}
 						showSearch
 						style={{ width: 200 }}
 						mode={"multiple"}
