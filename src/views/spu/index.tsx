@@ -1,9 +1,9 @@
-import { Button, Col, Form, FormProps, Input, Popconfirm, Row, Select, Switch, Table, Tag } from "antd";
+import { Button, Col, Form, FormProps, Input, message, Popconfirm, Row, Select, Switch, Table, Tag } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { Spu as SpuProp } from "@/api/interface/spu";
 import { PageMetaData, ReqPage } from "@/api/interface";
-import { spuListApi } from "@/api/modules/spu";
+import { spuListApi, switchSpuStatusApi } from "@/api/modules/spu";
 import Page from "@/components/page";
 import { OnlineStatus } from "@/views/product/category/enums";
 import { categoryAllList } from "@/api/modules/category";
@@ -27,6 +27,51 @@ const Sku = () => {
 	const [data, setData] = useState<Array<CategoryProp.CategoryRes>>([]);
 	const [pageMeta, setPageMeta] = useState<PageMetaData>({} as PageMetaData);
 	const [form] = Form.useForm();
+	const switchStatus = (id: string) => {
+		switchSpuStatusApi(id).then(res => {
+			if (res.code === 200) {
+				message.success("修改状态成功").then(() => {});
+			}
+		});
+	};
+
+	const onEdit = (id: string) => {
+		console.log(id);
+	};
+	const onDelete = (id: string) => {
+		console.log(id);
+	};
+	const fetchList = (param: ReqPage & FieldType) => {
+		spuListApi(param).then(res => {
+			const items = res.data.items.map((item: SpuProp.SpuRes) => {
+				return {
+					...item,
+					key: item.id
+				};
+			});
+			setList(items);
+			setPageMeta(res.data.meta);
+		});
+	};
+	const fetchCategory = () => {
+		categoryAllList().then(res => {
+			setData(res.data);
+		});
+	};
+	const onFinish: FormProps<FieldType>["onFinish"] = values => {
+		fetchList({ ...pageParam, ...values });
+	};
+	const onChange = (page: number, limit: number) => {
+		console.log(page, limit);
+	};
+
+	const onSuccess = () => {};
+
+	const onReset = () => {
+		form.resetFields();
+		fetchList(pageParam);
+	};
+
 	const columns = [
 		{
 			title: "序号",
@@ -97,7 +142,9 @@ const Sku = () => {
 			dataIndex: "online",
 			key: "online",
 			align: "center" as const,
-			render: (text: string) => <Switch defaultChecked={text === OnlineStatus.ONLINE} />
+			render: (text: string, record: SpuProp.SpuRes) => (
+				<Switch defaultChecked={text === OnlineStatus.ONLINE} onChange={() => switchStatus(record.id)} />
+			)
 		},
 		{
 			title: "创建时间",
@@ -150,42 +197,6 @@ const Sku = () => {
 			)
 		}
 	];
-	const onEdit = (id: string) => {
-		console.log(id);
-	};
-	const onDelete = (id: string) => {
-		console.log(id);
-	};
-	const fetchList = (param: ReqPage & FieldType) => {
-		spuListApi(param).then(res => {
-			const items = res.data.items.map((item: SpuProp.SpuRes) => {
-				return {
-					...item,
-					key: item.id
-				};
-			});
-			setList(items);
-			setPageMeta(res.data.meta);
-		});
-	};
-	const fetchCategory = () => {
-		categoryAllList().then(res => {
-			setData(res.data);
-		});
-	};
-	const onFinish: FormProps<FieldType>["onFinish"] = values => {
-		fetchList({ ...pageParam, ...values });
-	};
-	const onChange = (page: number, limit: number) => {
-		console.log(page, limit);
-	};
-
-	const onSuccess = () => {};
-
-	const onReset = () => {
-		form.resetFields();
-		fetchList(pageParam);
-	};
 
 	useEffect(() => {
 		fetchList(pageParam);

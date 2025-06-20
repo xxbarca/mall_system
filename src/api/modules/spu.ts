@@ -9,3 +9,7 @@ export const spuListApi = (params: Record<string, any>) => {
 export const specKeyListApi = () => {
 	return http.get<ResultData<Array<SpecKey.KeyRes>>>("/spec/key/list");
 };
+
+export const switchSpuStatusApi = (id: string) => {
+	return http.patch<ResultData<string>>(`/spu/switchStatus/${id}`);
+};
