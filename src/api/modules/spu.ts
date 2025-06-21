@@ -25,3 +25,7 @@ export const spuDeleteApi = (id: string) => {
 export const updateSpuApi = (id: string, data: Partial<Spu.SpuRes>) => {
 	return http.patch(`/spu`, { id, ...data });
 };
+
+export const spuAllList = () => {
+	return http.get<ResultData>("/spu/all/list");
+};

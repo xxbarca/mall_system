@@ -16,7 +16,7 @@ type FieldType = {
 	online?: string;
 };
 
-const Sku = () => {
+const Spu = () => {
 	const [pageParam] = useState<ReqPage>({
 		page: 1,
 		limit: 10
@@ -286,4 +286,4 @@ const Sku = () => {
 	);
 };
 
-export default Sku;
+export default Spu;
