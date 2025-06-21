@@ -6,7 +6,7 @@ export namespace Spu {
 		delete_time: string;
 		update_time: string;
 		create_time: string;
-		online: number;
+		online: string;
 		title: string;
 		subtitle: string;
 		description: string;
@@ -15,6 +15,7 @@ export namespace Spu {
 		price: string;
 		discount_price: string;
 		category: Category.CategoryRes;
+		specKeys: Array<SpecKey.KeyRes>;
 	}
 }
 

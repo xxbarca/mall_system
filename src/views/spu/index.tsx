@@ -1,9 +1,9 @@
-import { Button, Col, Form, FormProps, Input, message, Popconfirm, Row, Select, Switch, Table, Tag } from "antd";
+import { Button, Col, Form, FormProps, Input, message, Popconfirm, Row, Select, Table, Tag } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { Spu as SpuProp } from "@/api/interface/spu";
 import { PageMetaData, ReqPage } from "@/api/interface";
-import { spuListApi, switchSpuStatusApi } from "@/api/modules/spu";
+import { spuDeleteApi, spuListApi } from "@/api/modules/spu";
 import Page from "@/components/page";
 import { OnlineStatus } from "@/views/product/category/enums";
 import { categoryAllList } from "@/api/modules/category";
@@ -27,19 +27,20 @@ const Sku = () => {
 	const [data, setData] = useState<Array<CategoryProp.CategoryRes>>([]);
 	const [pageMeta, setPageMeta] = useState<PageMetaData>({} as PageMetaData);
 	const [form] = Form.useForm();
-	const switchStatus = (id: string) => {
-		switchSpuStatusApi(id).then(res => {
-			if (res.code === 200) {
-				message.success("修改状态成功").then(() => {});
-			}
-		});
-	};
+	const [spuData, setSpuData] = useState<SpuProp.SpuRes>();
 
-	const onEdit = (id: string) => {
-		console.log(id);
+	const onEdit = (index: number) => {
+		setOpen(true);
+		setSpuData(list[index]);
 	};
 	const onDelete = (id: string) => {
-		console.log(id);
+		spuDeleteApi(id).then(res => {
+			if (res.code === 200) {
+				message.success("删除分SPU成功", 0.5).then(() => {
+					fetchList(pageParam);
+				});
+			}
+		});
 	};
 	const fetchList = (param: ReqPage & FieldType) => {
 		spuListApi(param).then(res => {
@@ -65,7 +66,9 @@ const Sku = () => {
 		console.log(page, limit);
 	};
 
-	const onSuccess = () => {};
+	const onSuccess = () => {
+		fetchList(pageParam);
+	};
 
 	const onReset = () => {
 		form.resetFields();
@@ -101,6 +104,13 @@ const Sku = () => {
 			align: "center" as const
 		},
 		{
+			title: "描述",
+			key: "description",
+			dataIndex: "description",
+			width: 180,
+			align: "center" as const
+		},
+		{
 			title: "价格(元)",
 			key: "price",
 			dataIndex: "price",
@@ -129,9 +139,26 @@ const Sku = () => {
 			align: "center" as const,
 			render: (t: string) => (
 				<span>
-					{t.split("$").map(tag => (
-						<Tag color={"green"} key={tag}>
-							{tag.toUpperCase()}
+					{t
+						? t.split("$").map(tag => (
+								<Tag color={"green"} key={tag}>
+									{tag.toUpperCase()}
+								</Tag>
+						  ))
+						: ""}
+				</span>
+			)
+		},
+		{
+			title: "规格",
+			key: "specKeys",
+			dataIndex: "specKeys",
+			align: "center" as const,
+			render: (t: string, record: SpuProp.SpuRes) => (
+				<span>
+					{record.specKeys.map(key => (
+						<Tag color={"blue"} key={key.id}>
+							{key.name}
 						</Tag>
 					))}
 				</span>
@@ -142,9 +169,7 @@ const Sku = () => {
 			dataIndex: "online",
 			key: "online",
 			align: "center" as const,
-			render: (text: string, record: SpuProp.SpuRes) => (
-				<Switch defaultChecked={text === OnlineStatus.ONLINE} onChange={() => switchStatus(record.id)} />
-			)
+			render: (text: string) => <Tag color={"#108ee9"}>{text === OnlineStatus.ONLINE ? "上架" : "下架"}</Tag>
 		},
 		{
 			title: "创建时间",
@@ -177,11 +202,11 @@ const Sku = () => {
 			key: "x",
 			width: 200,
 			fixed: "right" as const,
-			render: (_: any, record: SpuProp.SpuRes) => (
+			render: (_: any, record: SpuProp.SpuRes, index: number) => (
 				<div>
 					<Row gutter={10}>
 						<Col>
-							<Button size={"middle"} onClick={() => onEdit(record.id)}>
+							<Button size={"middle"} onClick={() => onEdit(index)}>
 								编辑
 							</Button>
 						</Col>
@@ -256,7 +281,7 @@ const Sku = () => {
 			</Form>
 			<Table columns={columns} dataSource={list} bordered scroll={{ x: "max-content" }} pagination={false} />
 			<Page pageMeta={pageMeta} onChange={onChange} />
-			<AddEdit open={open} data={data} onCancel={() => setOpen(false)} onSuccess={onSuccess} />
+			<AddEdit open={open} data={data} spu={spuData} onCancel={() => setOpen(false)} onSuccess={onSuccess} />
 		</div>
 	);
 };
