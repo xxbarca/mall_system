@@ -5,3 +5,7 @@ import { Sku } from "@/api/interface/sku";
 export const skuListApi = (params: Record<string, any>) => {
 	return http.post<PageResult<Sku.SkuRes>>("/sku/paginate", params);
 };
+
+export const createSkuApi = (params: Record<string, any>) => {
+	return http.post("/sku", params);
+};

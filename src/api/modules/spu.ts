@@ -29,3 +29,7 @@ export const updateSpuApi = (id: string, data: Partial<Spu.SpuRes>) => {
 export const spuAllList = () => {
 	return http.get<ResultData>("/spu/all/list");
 };
+
+export const keyDetailApi = (id: string) => {
+	return http.get<ResultData>(`/spec/key/detail/${id}`);
+};

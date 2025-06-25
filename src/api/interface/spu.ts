@@ -23,5 +23,13 @@ export namespace SpecKey {
 	export interface KeyRes {
 		id: string;
 		name: string;
+		values: Array<SpecValue.ValueRes>;
+	}
+}
+
+export namespace SpecValue {
+	export interface ValueRes {
+		id: string;
+		value: string;
 	}
 }

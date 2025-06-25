@@ -1,4 +1,4 @@
-import { Button, Col, Form, Input, Popconfirm, Row, Select, Table, Tag } from "antd";
+import { Button, Col, Form, FormProps, Input, Popconfirm, Row, Select, Table, Tag } from "antd";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { ReqPage } from "@/api/interface";
@@ -7,18 +7,27 @@ import { Sku as SkuProp } from "@/api/interface/sku";
 import { OnlineStatus } from "@/views/product/category/enums";
 import { spuAllList } from "@/api/modules/spu";
 import { Spu } from "@/api/interface/spu";
+import AddEdit from "@/views/sku/components/add-edit";
+
+type FieldType = {
+	title?: string;
+	spu?: string;
+	online?: string;
+};
 
 const Sku = () => {
-	const [list, setList] = useState<Array<SkuProp.SkuRes>>();
+	const [list, setList] = useState<Array<SkuProp.SkuRes>>([]);
 	const [spuList, setSpuList] = useState<Array<Spu.SpuRes>>([]);
 	const [form] = Form.useForm();
+	const [open, setOpen] = useState(false);
+	const [sku, setSku] = useState<SkuProp.SkuRes | null>();
 	const [pageParam] = useState<ReqPage>({
 		page: 1,
 		limit: 10
 	});
 	const { Option } = Select;
 
-	const fetchList = (param: ReqPage) => {
+	const fetchList = (param: ReqPage & FieldType) => {
 		skuListApi(param).then(res => {
 			const items = res.data.items.map((item: SkuProp.SkuRes) => {
 				return {
@@ -30,20 +39,28 @@ const Sku = () => {
 		});
 	};
 
+	const onFinish: FormProps<FieldType>["onFinish"] = values => {
+		fetchList({ ...pageParam, ...values });
+	};
+
 	const fetchSpuList = () => {
 		spuAllList().then(res => {
 			setSpuList(res.data);
 		});
 	};
-	const onEdit = (id: number) => {
-		console.log(id);
+	const onEdit = (sku: SkuProp.SkuRes | null) => {
+		setOpen(true);
+		setSku(sku);
 	};
 
 	const onDelete = (id: string) => {
 		console.log(id);
 	};
 
-	const onReset = () => {};
+	const onReset = () => {
+		form.resetFields();
+		fetchList(pageParam);
+	};
 
 	const columns = [
 		{
@@ -51,7 +68,7 @@ const Sku = () => {
 			key: "index",
 			align: "center" as const,
 			fixed: "left" as const,
-			render: (text: string, record: SkuProp.SkuRes, index: number) => index
+			render: (text: string, record: SkuProp.SkuRes, index: number) => index + 1
 		},
 		{
 			title: "标题",
@@ -136,7 +153,7 @@ const Sku = () => {
 				<div>
 					<Row gutter={10}>
 						<Col>
-							<Button size={"middle"} onClick={() => onEdit(index)}>
+							<Button size={"middle"} onClick={() => onEdit(list[index])}>
 								编辑
 							</Button>
 						</Col>
@@ -160,7 +177,7 @@ const Sku = () => {
 
 	return (
 		<div className={"card content-box"}>
-			<Form form={form}>
+			<Form form={form} onFinish={onFinish}>
 				<Row gutter={10}>
 					<Col span={6}>
 						<Form.Item label={"标题"} name={"title"}>
@@ -201,7 +218,9 @@ const Sku = () => {
 									<Button onClick={onReset}>重置</Button>
 								</Col>
 								<Col>
-									<Button type={"primary"}>添加</Button>
+									<Button type={"primary"} onClick={() => onEdit(null)}>
+										添加
+									</Button>
 								</Col>
 							</Row>
 						</Form.Item>
@@ -209,6 +228,7 @@ const Sku = () => {
 				</Row>
 			</Form>
 			<Table columns={columns} dataSource={list} bordered scroll={{ x: "max-content" }} pagination={false} />
+			<AddEdit open={open} sku={sku} spuList={spuList} onCancel={() => setOpen(false)} />
 		</div>
 	);
 };
