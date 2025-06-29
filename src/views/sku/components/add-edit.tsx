@@ -1,21 +1,23 @@
-import { Form, Input, Modal, Select, Switch } from "antd";
+import { Form, Input, message, Modal, Select, Switch } from "antd";
 import { Sku } from "@/api/interface/sku";
 import { useEffect, useState } from "react";
-import { SpecKey, Spu } from "@/api/interface/spu";
+import { Spu } from "@/api/interface/spu";
 import { OnlineStatus } from "@/views/product/category/enums";
-import { createSkuApi } from "@/api/modules/sku";
+import { createSkuApi, updateSkuApi } from "@/api/modules/sku";
+import { Spec } from "@/api/interface/spec";
 
 interface Props {
 	open: boolean;
 	sku?: Sku.SkuRes | null;
 	spuList: Array<Spu.SpuRes>;
 	onCancel: () => void;
+	onSuccess: () => void;
 }
 
-const AddEdit = ({ open, sku, onCancel, spuList }: Props) => {
+const AddEdit = ({ open, sku, onCancel, spuList, onSuccess }: Props) => {
 	const [checked, setChecked] = useState(false);
 	const [selectedSpu, setSelectedSpu] = useState<Spu.SpuRes | null>();
-	const [specs, setSpecs] = useState<Array<{ key: string; key_id: string; value: string; value_id: string }>>([]);
+	const [specs, setSpecs] = useState<Array<Spec.Spec>>([]);
 	const [form] = Form.useForm();
 
 	const onClose = () => {
@@ -31,8 +33,11 @@ const AddEdit = ({ open, sku, onCancel, spuList }: Props) => {
 			};
 			const keys = selectedSpu?.specKeys.map(i => i.id);
 			keys?.forEach(key => delete params[key]);
-			createSkuApi(params).then(res => {
-				console.log(res);
+			(sku ? updateSkuApi({ ...params, id: sku.id }) : createSkuApi(params)).then(() => {
+				message.success(sku ? "修改SKU成功" : "创建SKU成功", 0.5).then(() => {
+					onSuccess();
+					onCancel();
+				});
 			});
 		});
 	};
@@ -55,7 +60,7 @@ const AddEdit = ({ open, sku, onCancel, spuList }: Props) => {
 		setSpu(null);
 	};
 
-	const handleOnSelect = (o: { label: string; value: string }, i: SpecKey.KeyRes) => {
+	const handleOnSelect = (o: { label: string; value: string }, i: Spec.SpecKey) => {
 		const obj = {
 			key: i.name,
 			key_id: i.id,
@@ -79,6 +84,8 @@ const AddEdit = ({ open, sku, onCancel, spuList }: Props) => {
 				online: sku.online === OnlineStatus.ONLINE
 			});
 			setSelectedSpu(sku.spu);
+			setSpecs(sku.specs);
+			sku.specs.forEach(i => form.setFieldValue([i.key_id], i.value_id));
 		}
 	}, [sku]);
 
@@ -129,12 +136,13 @@ const AddEdit = ({ open, sku, onCancel, spuList }: Props) => {
 									placeholder={"请选择" + i.name}
 									showSearch
 									optionFilterProp="label"
+									defaultValue={specs.find(s => s.key_id === i.id)?.value_id}
 									onSelect={(v, o) => handleOnSelect(o, i)}
 									filterSort={(optionA, optionB) =>
 										(optionA?.label ?? "").toLowerCase().localeCompare((optionB?.label ?? "").toLowerCase())
 									}
 									options={i.values.map(d => ({ label: d.value, value: d.id }))}
-								></Select>
+								/>
 							</Form.Item>
 						);
 					})}

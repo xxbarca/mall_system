@@ -9,3 +9,7 @@ export const skuListApi = (params: Record<string, any>) => {
 export const createSkuApi = (params: Record<string, any>) => {
 	return http.post("/sku", params);
 };
+
+export const updateSkuApi = (params: Record<string, any>) => {
+	return http.patch("/sku", params);
+};

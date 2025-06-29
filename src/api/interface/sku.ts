@@ -1,4 +1,5 @@
 import { Spu } from "@/api/interface/spu";
+import { Spec } from "@/api/interface/spec";
 
 export namespace Sku {
 	export interface SkuRes {
@@ -12,5 +13,6 @@ export namespace Sku {
 		price: string;
 		discount_price: string;
 		spu: Spu.SpuRes;
+		specs: Array<Spec.Spec>;
 	}
 }

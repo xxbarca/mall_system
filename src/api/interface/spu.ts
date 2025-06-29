@@ -1,4 +1,5 @@
 import { Category } from "@/api/interface/category";
+import { Spec } from "@/api/interface/spec";
 
 export namespace Spu {
 	export interface SpuRes {
@@ -15,21 +16,6 @@ export namespace Spu {
 		price: string;
 		discount_price: string;
 		category: Category.CategoryRes;
-		specKeys: Array<SpecKey.KeyRes>;
-	}
-}
-
-export namespace SpecKey {
-	export interface KeyRes {
-		id: string;
-		name: string;
-		values: Array<SpecValue.ValueRes>;
-	}
-}
-
-export namespace SpecValue {
-	export interface ValueRes {
-		id: string;
-		value: string;
+		specKeys: Array<Spec.SpecKey>;
 	}
 }

@@ -53,6 +53,10 @@ const Sku = () => {
 		setSku(sku);
 	};
 
+	const onSuccess = () => {
+		fetchList(pageParam);
+	};
+
 	const onDelete = (id: string) => {
 		console.log(id);
 	};
@@ -95,7 +99,9 @@ const Sku = () => {
 			dataIndex: "online",
 			key: "online",
 			align: "center" as const,
-			render: (text: string) => <Tag color={"#108ee9"}>{text === OnlineStatus.ONLINE ? "上架" : "下架"}</Tag>
+			render: (text: string) => (
+				<Tag color={text === OnlineStatus.ONLINE ? "#108ee9" : "red"}>{text === OnlineStatus.ONLINE ? "上架" : "下架"}</Tag>
+			)
 		},
 		{
 			title: "价格(元)",
@@ -228,7 +234,7 @@ const Sku = () => {
 				</Row>
 			</Form>
 			<Table columns={columns} dataSource={list} bordered scroll={{ x: "max-content" }} pagination={false} />
-			<AddEdit open={open} sku={sku} spuList={spuList} onCancel={() => setOpen(false)} />
+			<AddEdit open={open} sku={sku} spuList={spuList} onCancel={() => setOpen(false)} onSuccess={onSuccess} />
 		</div>
 	);
 };

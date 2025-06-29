@@ -1,9 +1,10 @@
 import { Form, Input, message, Modal, Select, Switch } from "antd";
 import { Category } from "@/api/interface/category";
 import { useEffect, useState } from "react";
-import { SpecKey, Spu } from "@/api/interface/spu";
+import { Spu } from "@/api/interface/spu";
 import { createSpuApi, specKeyListApi, updateSpuApi } from "@/api/modules/spu";
 import { OnlineStatus } from "@/views/product/category/enums";
+import { Spec } from "@/api/interface/spec";
 
 interface Props {
 	open: boolean;
@@ -15,7 +16,7 @@ interface Props {
 const AddEdit = ({ open, onCancel, onSuccess, data, spu }: Props) => {
 	const [form] = Form.useForm();
 	const [checked, setChecked] = useState<boolean>(true);
-	const [keyList, setKeyList] = useState<Array<SpecKey.KeyRes>>([]);
+	const [keyList, setKeyList] = useState<Array<Spec.SpecKey>>([]);
 	const onOk = () => {
 		form.validateFields().then(values => {
 			const params = {
