@@ -157,15 +157,15 @@ const Sku = () => {
 			fixed: "right" as const,
 			render: (_: any, record: SkuProp.SkuRes, index: number) => (
 				<div>
-					<Row gutter={10}>
+					<Row gutter={10} justify={"center"}>
 						<Col>
-							<Button size={"middle"} onClick={() => onEdit(list[index])}>
+							<Button size={"small"} onClick={() => onEdit(list[index])}>
 								编辑
 							</Button>
 						</Col>
 						<Col>
 							<Popconfirm title={"确认删除此条记录?"} onConfirm={() => onDelete(record.id)}>
-								<Button danger type={"primary"} size={"middle"}>
+								<Button danger type={"primary"} size={"small"}>
 									删除
 								</Button>
 							</Popconfirm>

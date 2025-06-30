@@ -1,13 +1,14 @@
 import http from "@/api";
 import { PageResult, ResultData } from "@/api/interface";
-import { SpecKey, Spu } from "@/api/interface/spu";
+import { Spu } from "@/api/interface/spu";
+import { Spec } from "@/api/interface/spec";
 
 export const spuListApi = (params: Record<string, any>) => {
 	return http.post<PageResult<Spu.SpuRes>>("/spu/paginate", params);
 };
 
 export const specKeyListApi = () => {
-	return http.get<ResultData<Array<SpecKey.KeyRes>>>("/spec/key/list");
+	return http.get<ResultData<Array<Spec.SpecKey>>>("/spec/key/list");
 };
 
 export const switchSpuStatusApi = (id: string) => {
@@ -32,4 +33,8 @@ export const spuAllList = () => {
 
 export const keyDetailApi = (id: string) => {
 	return http.get<ResultData>(`/spec/key/detail/${id}`);
+};
+
+export const setDefaultSkuApi = (params: Record<string, any>) => {
+	return http.post(`/spu/setDefaultSku`, params);
 };

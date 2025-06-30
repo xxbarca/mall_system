@@ -1,14 +1,16 @@
-import { Button, Col, Form, FormProps, Input, message, Popconfirm, Row, Select, Table, Tag } from "antd";
+import { Button, Col, Form, FormProps, Input, message, Modal, Popconfirm, Row, Select, Table, Tag } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { Spu as SpuProp } from "@/api/interface/spu";
 import { PageMetaData, ReqPage } from "@/api/interface";
-import { spuDeleteApi, spuListApi } from "@/api/modules/spu";
+import { setDefaultSkuApi, spuDeleteApi, spuListApi } from "@/api/modules/spu";
 import Page from "@/components/page";
 import { OnlineStatus } from "@/views/product/category/enums";
 import { categoryAllList } from "@/api/modules/category";
 import { Category as CategoryProp } from "@/api/interface/category";
 import AddEdit from "@/views/spu/components/add-edit";
+import { listWithSpuApi } from "@/api/modules/sku";
+import { Sku } from "@/api/interface/sku";
 
 type FieldType = {
 	title?: string;
@@ -28,7 +30,10 @@ const Spu = () => {
 	const [pageMeta, setPageMeta] = useState<PageMetaData>({} as PageMetaData);
 	const [form] = Form.useForm();
 	const [spuData, setSpuData] = useState<SpuProp.SpuRes>();
-
+	const [modalVisible, setModalVisible] = useState<boolean>(false);
+	const [skuList, setSkuList] = useState<Array<Sku.SkuRes>>([]);
+	const [spuId, setSpuId] = useState<string>("");
+	const [defaultSkuId, setDefaultSkuId] = useState<string>("");
 	const onEdit = (index: number) => {
 		setOpen(true);
 		setSpuData(list[index]);
@@ -42,6 +47,18 @@ const Spu = () => {
 			}
 		});
 	};
+	const setDefaultSKU = (spuId: string) => {
+		setSpuId(spuId);
+		setModalVisible(true);
+		fetchSkuWithSpu(spuId);
+	};
+
+	const fetchSkuWithSpu = (id: string) => {
+		listWithSpuApi(id).then(res => {
+			setSkuList(res.data);
+		});
+	};
+
 	const fetchList = (param: ReqPage & FieldType) => {
 		spuListApi(param).then(res => {
 			const items = res.data.items.map((item: SpuProp.SpuRes) => {
@@ -52,6 +69,13 @@ const Spu = () => {
 			});
 			setList(items);
 			setPageMeta(res.data.meta);
+		});
+	};
+
+	const handleOnOk = () => {
+		setDefaultSkuApi({ id: spuId, sku_id: defaultSkuId }).then(() => {
+			setModalVisible(false);
+			fetchList(pageParam);
 		});
 	};
 	const fetchCategory = () => {
@@ -169,7 +193,9 @@ const Spu = () => {
 			dataIndex: "online",
 			key: "online",
 			align: "center" as const,
-			render: (text: string) => <Tag color={"#108ee9"}>{text === OnlineStatus.ONLINE ? "上架" : "下架"}</Tag>
+			render: (text: string) => (
+				<Tag color={text === OnlineStatus.ONLINE ? "#108ee9" : "red"}>{text === OnlineStatus.ONLINE ? "上架" : "下架"}</Tag>
+			)
 		},
 		{
 			title: "创建时间",
@@ -200,22 +226,27 @@ const Spu = () => {
 			dataIndex: "",
 			align: "center" as const,
 			key: "x",
-			width: 200,
+			width: 230,
 			fixed: "right" as const,
 			render: (_: any, record: SpuProp.SpuRes, index: number) => (
 				<div>
-					<Row gutter={10}>
+					<Row gutter={10} justify={"center"}>
 						<Col>
-							<Button size={"middle"} onClick={() => onEdit(index)}>
+							<Button size={"small"} onClick={() => onEdit(index)}>
 								编辑
 							</Button>
 						</Col>
 						<Col>
 							<Popconfirm title={"确认删除此条记录?"} onConfirm={() => onDelete(record.id)}>
-								<Button danger type={"primary"} size={"middle"}>
+								<Button danger type={"primary"} size={"small"}>
 									删除
 								</Button>
 							</Popconfirm>
+						</Col>
+						<Col>
+							<Button type={"primary"} size={"small"} onClick={() => setDefaultSKU(record.id)}>
+								默认SKU
+							</Button>
 						</Col>
 					</Row>
 				</div>
@@ -282,6 +313,26 @@ const Spu = () => {
 			<Table columns={columns} dataSource={list} bordered scroll={{ x: "max-content" }} pagination={false} />
 			<Page pageMeta={pageMeta} onChange={onChange} />
 			<AddEdit open={open} data={data} spu={spuData} onCancel={() => setOpen(false)} onSuccess={onSuccess} />
+			<Modal open={modalVisible} title={"设置默认SKU"} onCancel={() => setModalVisible(false)} onOk={handleOnOk}>
+				<Row gutter={10} justify={"center"} align={"middle"}>
+					<Col span={4}>
+						<label>默认SKU</label>
+					</Col>
+					<Col span={20}>
+						<Select
+							style={{ width: "100%" }}
+							placeholder={"请选择SKU"}
+							onChange={id => setDefaultSkuId(id)}
+							options={skuList.map(s => {
+								return {
+									label: s.title,
+									value: s.id
+								};
+							})}
+						/>
+					</Col>
+				</Row>
+			</Modal>
 		</div>
 	);
 };
