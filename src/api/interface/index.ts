@@ -9,6 +9,12 @@ export interface ResultData<T = any> extends Result {
 	data: T;
 }
 
+export interface BaseRes {
+	delete_time: string;
+	update_time: string;
+	create_time: string;
+}
+
 export interface PageMetaData {
 	currentPage: number;
 	itemCount: number;

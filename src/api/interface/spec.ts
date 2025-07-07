@@ -1,8 +1,11 @@
+import { BaseRes } from "@/api/interface/index";
+
 export namespace Spec {
-	export interface SpecKey {
+	export interface SpecKey extends BaseRes {
 		id: string;
 		name: string;
-		values: Array<SpecValue>;
+		values?: Array<SpecValue>;
+		unit: string;
 	}
 
 	export interface SpecValue {
