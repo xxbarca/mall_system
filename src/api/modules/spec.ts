@@ -9,3 +9,7 @@ export const specKeyListApi = (params: Record<string, any>) => {
 export const specKeyCreateApi = (params: Record<string, any>) => {
 	return http.post("/spec/key", params);
 };
+
+export const specKeyUpdateApi = (params: Record<string, any>) => {
+	return http.patch("/spec/key/update", params);
+};

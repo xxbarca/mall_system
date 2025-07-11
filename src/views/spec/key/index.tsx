@@ -1,13 +1,13 @@
-import { Button, Col, Form, Row, Table } from "antd";
+import { Button, Col, Form, Popconfirm, Row, Table } from "antd";
 import { useEffect, useState } from "react";
 import { ReqPage } from "@/api/interface";
 import { specKeyListApi } from "@/api/modules/spec";
 import { Spec } from "@/api/interface/spec";
 import dayjs from "dayjs";
 import { KeyAddEdit } from "@/views/spec/components/key-add-edit";
-
 const SpecKey = () => {
 	const [list, setList] = useState<Array<Spec.SpecKey>>([]);
+	const [key, setKey] = useState<Spec.SpecKey | null>();
 	const [open, setOpen] = useState(false);
 	const [pageParam] = useState<ReqPage>({
 		page: 1,
@@ -34,6 +34,14 @@ const SpecKey = () => {
 	useEffect(() => {
 		fetchList(pageParam);
 	}, []);
+
+	const onEdit = (key: Spec.SpecKey) => {
+		setOpen(true);
+		setKey(key);
+	};
+	const onDelete = (id: string) => {
+		console.log(id);
+	};
 
 	const columns = [
 		{
@@ -76,8 +84,35 @@ const SpecKey = () => {
 			dataIndex: "update_time",
 			align: "center" as const,
 			render: (t: string) => <div>{t ? dayjs(t).format("YYYY-MM-DD hh:mm:ss") : ""}</div>
+		},
+		{
+			title: "操作",
+			dataIndex: "",
+			align: "center" as const,
+			key: "x",
+			width: 200,
+			fixed: "right" as const,
+			render: (_: any, record: Spec.SpecKey, index: number) => (
+				<div>
+					<Row gutter={10} justify={"center"}>
+						<Col>
+							<Button size={"small"} onClick={() => onEdit(list[index])}>
+								编辑
+							</Button>
+						</Col>
+						<Col>
+							<Popconfirm title={"确认删除此条记录?"} onConfirm={() => onDelete(record.id)}>
+								<Button danger type={"primary"} size={"small"}>
+									删除
+								</Button>
+							</Popconfirm>
+						</Col>
+					</Row>
+				</div>
+			)
 		}
 	];
+
 	return (
 		<div className={"card content-box"}>
 			<Form>
@@ -96,7 +131,7 @@ const SpecKey = () => {
 				</Row>
 			</Form>
 			<Table columns={columns} dataSource={list} bordered scroll={{ x: "max-content" }} pagination={false} />
-			<KeyAddEdit open={open} onSuccess={onSuccess} onCancel={() => setOpen(false)} />
+			<KeyAddEdit open={open} onSuccess={onSuccess} onCancel={() => setOpen(false)} specKey={key} />
 		</div>
 	);
 };
