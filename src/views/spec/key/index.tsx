@@ -1,7 +1,7 @@
-import { Button, Col, Form, Popconfirm, Row, Table } from "antd";
+import { Button, Col, Form, message, Popconfirm, Row, Table } from "antd";
 import { useEffect, useState } from "react";
 import { ReqPage } from "@/api/interface";
-import { specKeyListApi } from "@/api/modules/spec";
+import { specKeyDelete, specKeyListApi } from "@/api/modules/spec";
 import { Spec } from "@/api/interface/spec";
 import dayjs from "dayjs";
 import { KeyAddEdit } from "@/views/spec/components/key-add-edit";
@@ -40,7 +40,11 @@ const SpecKey = () => {
 		setKey(key);
 	};
 	const onDelete = (id: string) => {
-		console.log(id);
+		specKeyDelete(id).then(() => {
+			message.success("删除成功", 0.5).then(() => {
+				fetchList(pageParam);
+			});
+		});
 	};
 
 	const columns = [

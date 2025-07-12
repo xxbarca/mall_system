@@ -13,3 +13,7 @@ export const specKeyCreateApi = (params: Record<string, any>) => {
 export const specKeyUpdateApi = (params: Record<string, any>) => {
 	return http.patch("/spec/key/update", params);
 };
+
+export const specKeyDelete = (id: string) => {
+	return http.delete(`/spec/key/${id}`);
+};
