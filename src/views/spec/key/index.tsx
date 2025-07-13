@@ -1,10 +1,13 @@
-import { Button, Col, Form, message, Popconfirm, Row, Table } from "antd";
+import { Button, Col, Form, FormProps, Input, message, Popconfirm, Row, Table } from "antd";
 import { useEffect, useState } from "react";
 import { ReqPage } from "@/api/interface";
 import { specKeyDelete, specKeyListApi } from "@/api/modules/spec";
 import { Spec } from "@/api/interface/spec";
 import dayjs from "dayjs";
 import { KeyAddEdit } from "@/views/spec/components/key-add-edit";
+type FieldType = {
+	name?: string;
+};
 const SpecKey = () => {
 	const [list, setList] = useState<Array<Spec.SpecKey>>([]);
 	const [key, setKey] = useState<Spec.SpecKey | null>();
@@ -13,6 +16,7 @@ const SpecKey = () => {
 		page: 1,
 		limit: 10
 	});
+	const [form] = Form.useForm();
 
 	const fetchList = (param: ReqPage) => {
 		specKeyListApi(param).then(res => {
@@ -45,6 +49,15 @@ const SpecKey = () => {
 				fetchList(pageParam);
 			});
 		});
+	};
+
+	const onReset = () => {
+		form.resetFields();
+		fetchList(pageParam);
+	};
+
+	const onFinish: FormProps<FieldType>["onFinish"] = values => {
+		fetchList({ ...pageParam, ...values });
 	};
 
 	const columns = [
@@ -119,11 +132,24 @@ const SpecKey = () => {
 
 	return (
 		<div className={"card content-box"}>
-			<Form>
+			<Form form={form} onFinish={onFinish}>
 				<Row gutter={10}>
+					<Col span={6}>
+						<Form.Item label={"规格名"} name={"name"}>
+							<Input placeholder={"请输入规格名"} size={"middle"} />
+						</Form.Item>
+					</Col>
 					<Col span={6}>
 						<Form.Item label={null}>
 							<Row gutter={10}>
+								<Col>
+									<Button type={"primary"} htmlType={"submit"}>
+										搜索
+									</Button>
+								</Col>
+								<Col>
+									<Button onClick={onReset}>重置</Button>
+								</Col>
 								<Col>
 									<Button type={"primary"} onClick={() => setOpen(true)}>
 										添加
