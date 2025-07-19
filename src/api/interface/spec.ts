@@ -8,7 +8,7 @@ export namespace Spec {
 		unit: string;
 	}
 
-	export interface SpecValue {
+	export interface SpecValue extends BaseRes {
 		id: string;
 		value: string;
 	}
